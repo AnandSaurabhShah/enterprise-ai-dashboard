@@ -1,0 +1,32 @@
+# Node / frontend build outputs
+node_modules/
+dist/
+
+# Local Python environments
+.modelenv/
+.modelenv313/
+.venv/
+venv/
+
+# Local runtime files
+.codex-run/
+*.log
+*.pid
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Generated model artifacts and local data stores
+ml_service/artifacts/
+ml_service/data/
+server/data/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
