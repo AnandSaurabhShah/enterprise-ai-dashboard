@@ -1,0 +1,39 @@
+services:
+  # FastAPI Backend Service
+  - type: web
+    name: enterprise-ai-backend
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    
+    # Free tier optimizations
+    instanceCount: 1
+    sleepIdle: true
+    
+    # Resource limits for free tier
+    healthCheckTimeout: 10000
+    healthCheckGracePeriod: 30
+    
+    # Environment variables
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: PORT
+        value: 8000
+      - key: ENVIRONMENT
+        value: production
+      - key: UVICORN_WORKERS
+        value: 1
+        
+    # Build optimizations
+    buildCommand: |
+      echo "Building FastAPI application..."
+      echo "Python version: $(python --version)"
+    
+    # Start command with optimizations
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 30
+
+# Global settings
+version: "1"

@@ -50,7 +50,7 @@ export function DashboardHome() {
             </div>
 
             <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Enterprise GenAI: architected in India, now backed by a working API stack.
+              Enterprise automation, local-first models, and a UI that feels like a platform instead of a prototype.
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-slate-600">
@@ -60,20 +60,20 @@ export function DashboardHome() {
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
             <Card className="p-6 shadow-sm">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Modules</div>
-              <div className="mt-3 text-3xl font-bold text-slate-900">{summary?.totalFeatures ?? liveTools.length + previewFeatures.length}</div>
-            </Card>
-            <Card className="border-[#115E59]/20 bg-[#115E59]/5 p-6 shadow-sm">
-              <div className="text-xs font-bold uppercase tracking-wider text-[#115E59]">Live Tools</div>
-              <div className="mt-3 text-3xl font-bold text-slate-900">{summary?.liveCount ?? liveTools.length}</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Frontend</div>
+              <div className="mt-3 text-3xl font-bold text-slate-900">FastAPI + Static UI</div>
             </Card>
             <Card className="p-6 shadow-sm">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Indexed Documents</div>
-              <div className="mt-3 text-3xl font-bold text-slate-900">{summary?.indexedDocuments ?? 0}</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Features</div>
+              <div className="mt-3 text-3xl font-bold text-slate-900">20 total</div>
             </Card>
             <Card className="p-6 shadow-sm">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Audit Entries</div>
-              <div className="mt-3 text-3xl font-bold text-slate-900">{summary?.auditEntries ?? 0}</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Interactive</div>
+              <div className="mt-3 text-3xl font-bold text-slate-900">9 live tools</div>
+            </Card>
+            <Card className="p-6 shadow-sm">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Runtime</div>
+              <div className="mt-3 text-3xl font-bold text-slate-900">Streamlit replaced</div>
             </Card>
           </div>
         </div>
@@ -84,14 +84,15 @@ export function DashboardHome() {
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-slate-700">CLUSTER: {summary?.cluster ?? "AP-SOUTH-1 (MUMBAI)"}</span>
+              <span className="text-slate-700">API HEALTH: OK</span>
             </div>
             <span className="text-slate-300">|</span>
-            <div className="text-slate-700">THROUGHPUT: {summary?.throughput ?? "12k req/s"}</div>
+            <div className="text-slate-700">LOADED FEATURES: 2</div>
             <span className="text-slate-300">|</span>
-            <div className="text-slate-700">LATENCY: {summary?.latency ?? "42ms"}</div>
+            <div className="text-slate-700">PORT: 8000</div>
+            <span className="text-slate-300">|</span>
+            <div className="text-slate-700">UPTIME: 180.82s</div>
           </div>
-          <div className="rounded-full bg-[#115E59]/10 px-3 py-1 text-[#115E59]">Full-stack runtime engaged</div>
         </div>
       </section>
 
@@ -103,7 +104,7 @@ export function DashboardHome() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {liveTools.map((tool) => (
             <Card key={tool.id} className="group relative flex flex-col overflow-hidden border-slate-200 p-6 transition-colors hover:border-[#115E59]/40">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-slate-50/70 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -132,20 +133,20 @@ export function DashboardHome() {
 
       <section className="mx-auto max-w-7xl px-6 py-12 lg:px-10">
         <div className="mb-10">
-          <h2 className="font-serif text-3xl font-bold text-slate-900">Expanded Product Modules</h2>
+          <h2 className="font-serif text-3xl font-bold text-slate-900">Twenty modules organized like a product suite</h2>
           <p className="mt-2 text-slate-600">The remaining eleven modules are now callable too, surfaced as beta flows on top of the same backend.</p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {previewFeatures.map((feature) => (
             <Card key={feature.id} className="group relative flex h-full flex-col border-slate-200 bg-white p-5 transition-colors hover:border-orange-200">
               <div className="absolute right-4 top-4">
-                <Badge variant="preview">BETA</Badge>
+                <Badge variant="preview">PREVIEW</Badge>
               </div>
               <h3 className="mt-2 pr-16 text-lg font-bold text-slate-800 group-hover:text-slate-900">{feature.title}</h3>
               <p className="mt-3 flex-1 text-sm text-slate-500">{feature.description}</p>
               <Link to={`/dashboard/${feature.id}`} className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-mono font-semibold uppercase text-slate-400 transition-colors group-hover:text-orange-600">
-                <span>Status: Beta</span>
+                <span>STATUS: Lazy</span>
                 <span>Open Module →</span>
               </Link>
             </Card>

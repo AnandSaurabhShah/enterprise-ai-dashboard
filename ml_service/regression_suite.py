@@ -117,6 +117,8 @@ class RegressionSuite:
             ("Positive", "The team was helpful and the billing issue got resolved quickly."),
             ("Neutral", "Sharing the latest customer update for review by the support lead."),
             ("Negative", "The customer is angry because the service is still broken and no one owns it."),
+            ("Neutral", "Thanks for the quick fix, though the onboarding notes are still unclear."),
+            ("Negative", "The support engineer was polite but we are still blocked and cannot proceed."),
         ]
         for expected, text in cases:
             result = self.infer("sentiment", "score", {"feedbackText": text, "customerTier": "Mid-market", "responseWindow": "24 hours"})

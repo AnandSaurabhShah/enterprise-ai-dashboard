@@ -207,6 +207,89 @@ def safe_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
+SENTIMENT_POSITIVE_TERMS = [
+    "helpful",
+    "responsive",
+    "quick",
+    "resolved",
+    "fixed",
+    "closed",
+    "professional",
+    "smooth",
+    "excellent",
+    "polite",
+    "reassured",
+    "clarified",
+    "owned",
+]
+SENTIMENT_NEGATIVE_TERMS = [
+    "blocked",
+    "delay",
+    "delayed",
+    "frustrated",
+    "angry",
+    "unresolved",
+    "confusing",
+    "dismissive",
+    "poor",
+    "slow",
+    "broken",
+    "waiting",
+    "failing",
+    "upset",
+]
+SENTIMENT_STRONG_NEGATIVE_PATTERNS = [
+    r"\bstill blocked\b",
+    r"\bunresolved\b",
+    r"\bstill failing\b",
+    r"\bnothing (?:actually )?moved forward\b",
+    r"\bno ownership\b",
+    r"\bno response\b",
+]
+SENTIMENT_RESOLUTION_TERMS = ["resolved", "fixed", "closed", "recovered", "clarified", "completed"]
+
+
+def _matched_terms(lower: str, terms: list[str]) -> list[str]:
+    return [term for term in terms if term in lower]
+
+
+def calibrate_sentiment_signal(model_label: str, confidence: float, text: str) -> tuple[str, int, dict[str, list[str] | bool]]:
+    lower = compact(text).lower()
+    positive_hits = unique(_matched_terms(lower, SENTIMENT_POSITIVE_TERMS))
+    negative_hits = unique(_matched_terms(lower, SENTIMENT_NEGATIVE_TERMS))
+    strong_negative = any(re.search(pattern, lower) for pattern in SENTIMENT_STRONG_NEGATIVE_PATTERNS)
+    resolution_hits = unique(_matched_terms(lower, SENTIMENT_RESOLUTION_TERMS))
+    base_score = {"Positive": 80, "Neutral": 55, "Negative": 28}[model_label]
+    score = base_score + len(positive_hits) * 5 - len(negative_hits) * 7
+
+    if strong_negative:
+        score = min(score, 34)
+    elif positive_hits and negative_hits:
+        if resolution_hits:
+            score = clamp(score, 46, 62)
+        else:
+            score = clamp(score, 38, 62)
+
+    score = int(round(clamp(score, 0, 100)))
+    label = "Positive" if score >= 68 else ("Negative" if score <= 42 else "Neutral")
+
+    # When the model is uncertain, lexical cues break the tie on mixed statements.
+    if confidence < 0.6 and positive_hits and negative_hits:
+        if strong_negative or len(negative_hits) > len(positive_hits):
+            label = "Negative"
+            score = min(score, 40)
+        elif resolution_hits:
+            label = "Neutral"
+            score = clamp(score, 48, 60)
+
+    return label, int(score), {
+        "positive_hits": positive_hits,
+        "negative_hits": negative_hits,
+        "resolution_hits": resolution_hits,
+        "strong_negative": strong_negative,
+    }
+
+
 def configured_ai4bharat_model_id() -> str:
     return os.environ.get("AI4BHARAT_MODEL_ID", AI4BHARAT_DEFAULT_MODEL_ID).strip() or AI4BHARAT_DEFAULT_MODEL_ID
 
@@ -673,12 +756,12 @@ class Runtime:
         text = normalize(inputs.get("feedbackText"))
         if not compact(text):
             raise ValueError("Enter customer feedback to score sentiment.")
-        label, confidence = self.classify_text("sentiment_model", text)
-        score = {"Positive": 80, "Neutral": 55, "Negative": 28}[label]
+        model_label, confidence = self.classify_text("sentiment_model", text)
+        label, score, signal = calibrate_sentiment_signal(model_label, confidence, text)
         urgency = "High" if any(token in text.lower() for token in ["urgent", "frustrated", "angry", "delay"]) else "Medium"
         return build_result(
             headline=f"{label} sentiment predicted at {score}/100.",
-            summary=f"The sentiment classifier tagged this feedback as {label.lower()} with {confidence:.0%} confidence for a {inputs.get('customerTier') or 'customer'} account.",
+            summary=f"The sentiment classifier tagged this feedback as {label.lower()} with {confidence:.0%} model confidence for a {inputs.get('customerTier') or 'customer'} account.",
             metrics=[
                 {"label": "Sentiment", "value": label},
                 {"label": "Score", "value": f"{score}/100"},
@@ -687,10 +770,14 @@ class Runtime:
             ],
             highlights=[
                 f"Response window: {inputs.get('responseWindow') or '24 hours'}",
+                f"Raw model label: {model_label}",
                 "Use a factual response anchored to the exact complaint language.",
                 "Model output is constrained to sentiment labels rather than open-ended generation.",
             ],
             sections=[
+                list_section("Positive Signals", signal["positive_hits"] or ["No strong positive cue matched."]),
+                list_section("Negative Signals", signal["negative_hits"] or ["No strong negative cue matched."]),
+                list_section("Resolution Signals", signal["resolution_hits"] or ["No explicit resolution cue matched."]),
                 text_section("Feedback Snapshot", excerpt(text, 360)),
             ],
         )
@@ -1496,9 +1583,10 @@ class Runtime:
         feedback = normalize(inputs.get("feedbackBatch"))
         if not compact(feedback):
             raise ValueError("Paste team feedback to measure morale.")
-        label, confidence = self.classify_text("sentiment_model", feedback)
+        model_label, confidence = self.classify_text("sentiment_model", feedback)
+        label, calibrated_score, signal = calibrate_sentiment_signal(model_label, confidence, feedback)
         burnout = sum(1 for token in ["burnout", "overload", "weekend", "stress", "late night"] if token in feedback.lower())
-        morale = {"Positive": 78, "Neutral": 58, "Negative": 34}[label] - burnout * 6
+        morale = calibrated_score - burnout * 6
         morale = clamp(morale, 0, 100)
         band = "Healthy" if morale >= 70 else ("Watch" if morale >= 50 else "At risk")
         return build_result(
@@ -1510,7 +1598,11 @@ class Runtime:
                 {"label": "Sentiment", "value": label},
                 {"label": "Confidence", "value": percent(confidence * 100, 0)},
             ],
-            sections=[text_section("Feedback Snapshot", excerpt(feedback, 420))],
+            sections=[
+                list_section("Positive Signals", signal["positive_hits"] or ["No strong positive cue matched."]),
+                list_section("Negative Signals", signal["negative_hits"] or ["No strong negative cue matched."]),
+                text_section("Feedback Snapshot", excerpt(feedback, 420)),
+            ],
         )
 
 

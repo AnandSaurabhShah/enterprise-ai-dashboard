@@ -8,7 +8,9 @@
     "build": "vite build",
     "dev": "vite",
     "dev:full": "concurrently \"npm run model-service\" \"npm run backend\" \"npm run dev\"",
+    "model:quality": ".\\.modelenv313\\Scripts\\python.exe -OO ml_service\\model_quality.py",
     "model:test": ".\\.modelenv313\\Scripts\\python.exe -OO ml_service\\regression_suite.py",
+    "model:thorough": "npm run model:train && npm run model:quality && npm run model:test",
     "model:train": ".\\.modelenv313\\Scripts\\python.exe -OO ml_service\\train_models.py",
     "model-service": ".\\.modelenv313\\Scripts\\python.exe ml_service\\server.py",
     "start": "node server/index.js"
