@@ -33,9 +33,9 @@ Copy values from [.env.example](/c:/Users/Anand Shah/Files/Frontend/.env.example
 
 API key notes are listed in [API_KEYS.md](/c:/Users/Anand Shah/Files/Frontend/API_KEYS.md).
 
-### Optional AI4Bharat multilingual enrichment
+###  AI4Bharat multilingual enrichment
 
-The Python model service can optionally call AI4Bharat's IndicBERT-family language detector for multilingual features:
+The Python model service can call AI4Bharat's IndicBERT-family language detector for multilingual features:
 
 - `AI4BHARAT_API_KEY`
 - `AI4BHARAT_API_KEY_HEADER`
@@ -45,7 +45,7 @@ The Python model service can optionally call AI4Bharat's IndicBERT-family langua
 
 If these are not set, the app keeps using the built-in local multilingual heuristics and classifiers.
 
-### Optional Ollama Cloud generation
+###  Ollama Cloud generation
 
 Generation-heavy flows can also be upgraded through Ollama:
 
@@ -53,7 +53,7 @@ Generation-heavy flows can also be upgraded through Ollama:
 - If that local Ollama instance is signed in, the app can use cloud models such as `gpt-oss:120b-cloud`
 - For direct cloud access, set `OLLAMA_API_KEY`; the runtime will target `https://ollama.com/api`
 
-Optional variables:
+ variables:
 
 - `OLLAMA_BASE_URL`
 - `OLLAMA_MODEL`
